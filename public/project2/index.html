@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Angus Brooks" />
+    <meta name="description" content="Describe your website">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title>Modeling, Testing, and Predicting Project</title>
+    <meta name="generator" content="Hugo 0.70.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/blog/">BLOG</a></li>
+        
+        <li><a href="/projects/">PROJECTS</a></li>
+        
+        <li><a href="/resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/project2/">Modeling, Testing, and Predicting Project</a></strong>
+          </h3>
+        </div>
+        <div class="blog-title">
+          <h4>
+          January 1, 0001
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<pre class="r"><code>library(tidyverse)
+library(tinytex)
+Teams &lt;- read.csv(&#39;Teams.csv&#39;)
+Teams &lt;- Teams %&gt;% filter(yearID &gt; 1999)
+Teams&lt;- Teams %&gt;% mutate(BA=(H/AB))
+colnames(Teams)[18:19] &lt;- c(&quot;X2B&quot;,&quot;X3B&quot;)
+Teams &lt;- Teams %&gt;% mutate(H1=H-X2B-X3B-HR)
+Teams &lt;- Teams %&gt;% mutate(SLG=((H1+2*X2B+3*X3B+4*HR)/AB))
+Teams &lt;- Teams %&gt;% select(yearID, franchID,WSWin,W,H,HR,BA,SLG,ERA,E)
+head(Teams)</code></pre>
+<pre><code>##   yearID franchID WSWin  W    H  HR        BA       SLG  ERA   E
+## 1   2000      ANA     N 82 1574 236 0.2796731 0.4724591 5.00 134
+## 2   2000      ARI     N 85 1466 179 0.2652434 0.4293468 4.35 107
+## 3   2000      ATL     N 95 1490 179 0.2714520 0.4286755 4.05 129
+## 4   2000      BAL     N 74 1508 184 0.2717607 0.4350333 5.37 116
+## 5   2000      BOS     N 85 1503 167 0.2669627 0.4234458 4.23 109
+## 6   2000      CHW     N 95 1615 216 0.2860432 0.4700673 4.66 133</code></pre>
+<p>For my second project, I decided to continue with the baseball dataset I used in my previous project. I looked at team-wide statistics for each season to see whether world series wins were determined by certain team statistics. I filtered the dataset to only have data from the 2000 season onward (since looking at over 150 years of baseball would be a lot to handle). In the dataset, yearID was the year the baseball season took place (there was 20 seasons worth of data), franchID was the team (30 teams total), WSWin was whether the team won the world series or not (Y means a world series win, N means they did not win the world series), W was the number of wins in the regular season, H was the number of hits in the regular season, HR was the number of homeruns in the regular season, BA was the team batting average in the season, SLG was slugging in the season (it basically calculated how many bases on average you will get during an at-bat), ERA is the earned run average of the team (how many earned runs the team allowed the opponents to score per 9 innings, and E was the number of defensive errors the team committed during the season). Because there were 30 teams and 20 seasons, there are 600 observations each for W,H,HR,BA,SLG,ERA, and E. There are 20 World series winners and 580 teams who did not win the world series.</p>
+<pre class="r"><code>man1 &lt;- manova(cbind(W,H,HR,BA,SLG,ERA,E)~WSWin, data=Teams)
+summary(man1)</code></pre>
+<pre><code>##            Df   Pillai approx F num Df den Df    Pr(&gt;F)    
+## WSWin       1 0.062535   5.6415      7    592 2.555e-06 ***
+## Residuals 598                                              
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>summary.aov(man1)</code></pre>
+<pre><code>##  Response W :
+##              Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## WSWin         1   4102  4101.6  31.004 3.893e-08 ***
+## Residuals   598  79112   132.3                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response H :
+##              Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## WSWin         1   88227   88227  13.176 0.0003079 ***
+## Residuals   598 4004302    6696                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response HR :
+##              Df Sum Sq Mean Sq F value Pr(&gt;F)
+## WSWin         1   2849  2849.2  2.1002 0.1478
+## Residuals   598 811262  1356.6               
+## 
+##  Response BA :
+##              Df   Sum Sq    Mean Sq F value   Pr(&gt;F)    
+## WSWin         1 0.002190 0.00219048  15.176 0.000109 ***
+## Residuals   598 0.086317 0.00014434                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response SLG :
+##              Df  Sum Sq   Mean Sq F value    Pr(&gt;F)    
+## WSWin         1 0.00858 0.0085775  12.239 0.0005026 ***
+## Residuals   598 0.41908 0.0007008                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response ERA :
+##              Df  Sum Sq Mean Sq F value   Pr(&gt;F)   
+## WSWin         1   2.659 2.65908  9.4247 0.002238 **
+## Residuals   598 168.720 0.28214                    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response E :
+##              Df Sum Sq Mean Sq F value  Pr(&gt;F)  
+## WSWin         1   1112 1111.63  4.2002 0.04085 *
+## Residuals   598 158268  264.66                  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>pairwise.t.test(Teams$W,Teams$WSWin,
+                p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  Teams$W and Teams$WSWin 
+## 
+##   N      
+## Y 3.9e-08
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(Teams$H,Teams$WSWin,
+                p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  Teams$H and Teams$WSWin 
+## 
+##   N      
+## Y 0.00031
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(Teams$BA,Teams$WSWin,
+                p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  Teams$BA and Teams$WSWin 
+## 
+##   N      
+## Y 0.00011
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(Teams$SLG,Teams$WSWin,
+                p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  Teams$SLG and Teams$WSWin 
+## 
+##   N    
+## Y 5e-04
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(Teams$ERA,Teams$WSWin,
+                p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  Teams$ERA and Teams$WSWin 
+## 
+##   N     
+## Y 0.0022
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(Teams$E,Teams$WSWin,
+                p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  Teams$E and Teams$WSWin 
+## 
+##   N    
+## Y 0.041
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>1+7 #Number of hypothesis tests performed</code></pre>
+<pre><code>## [1] 8</code></pre>
+<pre class="r"><code>1-(.95)^8</code></pre>
+<pre><code>## [1] 0.3365796</code></pre>
+<pre class="r"><code>.05/8 #Corrected critical value</code></pre>
+<pre><code>## [1] 0.00625</code></pre>
+<p>I performed a MANOVA on the 7 numeric variables that were not yearID or franchID. The MANOVA showed that for at least one response variable, the world series winner mean differs from the rest of the teams. (P = 2.555e-06). Because of this significance, I then performed univariate ANOVA’s for each of the 7 variables tested. All variables except for number of homeruns showed significant difference between the world series winner mean and the rest of the league’s mean. Post-hoc t-tests were unnecessary because the categorical variable only has two levels (I did include the code on how to perform the t-tests). Since the MANOVA was performed and 7 ANOVA tests were performed, a total of 8 hypothesis tests were conducted. This meant that the probability of at least one Type I error was 1-.95^8 = 0.3365. Therefore, I used a bonferroni correction of .05/8 = 0.00625. This meant that only the significance of the number of errors committed was lost upon correction while the significance of wins, hits, batting average, slugging, and ERA remained. MANOVA tests have lots of assumptions, which makes it hard to meet all of them. The random sample and independent observations assumption was met. Multivariate normality may have not been met as there were only 20 world series winning teams in the dataset. Homogeneity of within-group covariance matrices was possibly not met as there were seven different dependent variables and it is possible that at least one violated the equal variance assumption. Linear relationships among dependent variables was likely met as the general trends of increases in batting statistics would likely increase the number of wins and a decrease in the ERA and errors would likely increase the number of wins. The no extreme outlier assumption was likely met due to baseball seasons being quite long and often many teams are close to one another in terms of stats. The multicollinearity assumption was likely not met as some of the batting variables likely vary together (for example SLG and HR).</p>
+<pre class="r"><code>Teams_randomization &lt;- Teams %&gt;% select(WSWin, BA)
+Teams%&gt;%group_by(WSWin)%&gt;%
+  summarize(means=mean(BA))%&gt;%summarize(`mean_diff:`=diff(means))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   `mean_diff:`
+##          &lt;dbl&gt;
+## 1       0.0106</code></pre>
+<pre class="r"><code>rand_dist&lt;-vector()
+for(i in 1:5000){
+new&lt;-data.frame(BA=sample(Teams_randomization$BA),WS=Teams_randomization$WSWin)
+rand_dist[i]&lt;-mean(new[new$WS==&quot;Y&quot;,]$BA)-
+              mean(new[new$WS==&quot;N&quot;,]$BA)}
+{hist(rand_dist,main=&quot;Null Distribution&quot;,ylab=&quot;&quot;); abline(v = 0.01064428    ,col=&quot;red&quot;)}</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>mean(rand_dist&gt;0.01064428 | rand_dist&lt; -0.01064428)</code></pre>
+<pre><code>## [1] 2e-04</code></pre>
+<p>I performed a mean difference randomization test to determine whether team batting average differs between world series winners and the rest of the league. The null hypothesis was that the mean batting average was the same for world series winners and non-world series winners. The alternative hypothesis was that the mean batting average was different for world series winners and non-world series winners. I computed a null distribution of 5000 randomized samples and compared the true mean difference of 0.01064428 to the null distribution. The results showed that the P-value was 0, which was less than the alpha cutoff value of 0.05. This meant that I rejected the null hypothesis and concluded that the mean batting average of world series winners was not the same as non-world series winners (world series winners had a roughly .01 higher batting average).</p>
+<pre class="r"><code>library(sandwich); library(lmtest)
+Teams$BA_c &lt;- Teams$BA - mean(Teams$BA)
+Teams$SLG_c &lt;- Teams$SLG - mean(Teams$SLG)
+Teams$ERA_c &lt;- Teams$ERA - mean(Teams$ERA)
+fit &lt;- lm(W~BA_c*SLG_c*ERA_c, data=Teams)
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = W ~ BA_c * SLG_c * ERA_c, data = Teams)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -14.4392  -3.1171   0.0262   3.2143  16.1857 
+## 
+## Coefficients:
+##                   Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)        81.0942     0.2234 362.975  &lt; 2e-16 ***
+## BA_c              163.5417    22.1225   7.393 4.94e-13 ***
+## SLG_c             234.8492    10.1580  23.120  &lt; 2e-16 ***
+## ERA_c             -17.2660     0.4202 -41.091  &lt; 2e-16 ***
+## BA_c:SLG_c       -923.2080   545.1257  -1.694   0.0909 .  
+## BA_c:ERA_c         14.6204    40.7646   0.359   0.7200    
+## SLG_c:ERA_c        24.0510    18.8072   1.279   0.2015    
+## BA_c:SLG_c:ERA_c -629.1405   903.3310  -0.696   0.4864    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 4.715 on 592 degrees of freedom
+## Multiple R-squared:  0.8419, Adjusted R-squared:   0.84 
+## F-statistic: 450.2 on 7 and 592 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>fit1 &lt;- lm(W~BA_c*ERA_c, data=Teams)
+new1&lt;-Teams
+new1$BA_c&lt;-mean(Teams$BA_c)
+new1$mean&lt;-predict(fit1,new1)
+new1$BA_c&lt;-mean(Teams$BA_c)+sd(Teams$BA_c)
+new1$plus.sd&lt;-predict(fit1,new1)
+new1$BA_c&lt;-mean(Teams$BA_c)-sd(Teams$BA_c)
+new1$minus.sd&lt;-predict(fit1,new1)
+newint&lt;-new1%&gt;%select(W,ERA_c,mean,plus.sd,minus.sd)%&gt;%gather(BA,value,-W,-ERA_c)
+
+mycols&lt;-c(&quot;#619CFF&quot;,&quot;#F8766D&quot;,&quot;#00BA38&quot;)
+names(mycols)&lt;-c(&quot;-1 sd&quot;,&quot;mean&quot;,&quot;+1 sd&quot;)
+mycols=as.factor(mycols)
+
+ggplot(Teams,aes(ERA_c,W),group=mycols)+geom_point()+geom_line(data=new1,aes(y=mean,color=&quot;mean&quot;))+geom_line(data=new1,aes(y=plus.sd,color=&quot;+1 sd&quot;))+geom_line(data=new1,aes(y=minus.sd,color=&quot;-1 sd&quot;))+scale_color_manual(values=mycols)+labs(color=&quot;BA (cont)&quot;)+theme(legend.position=c(.9,.2))</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(Teams) + geom_point(aes(BA_c,W))</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(Teams) + geom_point(aes(ERA_c,W))</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-4-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(Teams) + geom_point(aes(SLG_c,W))</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-4-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>resids&lt;-lm(W~BA_c*SLG_c*ERA_c, data=Teams)$residuals
+ ggplot()+geom_histogram(aes(resids),bins=10)</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-4-5.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fitvals&lt;-fit$fitted.values
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, color=&#39;red&#39;)</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-4-6.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>coeftest(fit, vcov = vcovHC(fit))</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##                    Estimate Std. Error  t value  Pr(&gt;|t|)    
+## (Intercept)        81.09420    0.22196 365.3533 &lt; 2.2e-16 ***
+## BA_c              163.54175   24.43044   6.6942 5.042e-11 ***
+## SLG_c             234.84921   10.28345  22.8376 &lt; 2.2e-16 ***
+## ERA_c             -17.26602    0.40210 -42.9400 &lt; 2.2e-16 ***
+## BA_c:SLG_c       -923.20804  596.74455  -1.5471    0.1224    
+## BA_c:ERA_c         14.62044   47.87248   0.3054    0.7602    
+## SLG_c:ERA_c        24.05105   18.68205   1.2874    0.1985    
+## BA_c:SLG_c:ERA_c -629.14052 1177.78577  -0.5342    0.5934    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>I performed a regression to see if the number of wins can be determined by batting average, slugging, and ERA. The intercept estimate meant that a team with an average batting average, average slugging, and an average ERA would win 81.09 games per season. Since BA and SLG are not whole number variables, I’ll interpret them as for every .001 increase to be better understandable. The BA_c coefficient means that, controlling for SLG and ERA, wins increase by .163 for every .001 increase in batting average. The SLG_c coefficient means that, controlling for BA and ERA, wins increase by .235 for every .001 increase in slugging. The ERA_c coefficient means that, controlling for BA and SLG, there is a decrease in wins by 17.266 for every one unit increase in ERA. The interaction coefficients can also be interpreted. The BA_c:SLG_c coefficient indicates that for every one whole unit increase in both BA and SLG, the number of games won decreases by 923.21. The BA_c:ERA_c coefficient indicates that for every one whole unit increase in both BA and ERA, the number of games won increases by 14.62. The SLG_c:ERA_c coefficient indicates that for every one whole unit increase in both SLG and ERA, the number of games won increases by 24.05. And lastly, the BA_c:SLG_c:ERA_c coefficient indicates that for every one whole unit increase in BA, SLG, and ERA, the number of games won decreases by 629.14. For the plot, I decided to use the BA_c and ERA_c predictors to show the regression. The assumption of linearity was confirmed using scatterplots of each predictor against the response variable. All three appeared to be linear. A histogram of the residuals showed that they were normally distributed. Plotting fitted values against residuals and seeing no fanning out showed there was equal variance of the residuals along the regression line. I then computed the regression results with robust standard errors. The results indicated that batting average (P &lt; 5.042e-11), slugging (P &lt; 2.2e-16), and ERA (P &lt; 2.2e-16) were all significant predictors of the number of wins. This outcome was the same in both the original model and the model which used robust standard errors (the only difference being that the p-values were slightly higher but still very significant). In both models, the interactions were not significant. The adjusted R squared value of the model was 0.84, which meant that 84% of the variation in wins was explained by the model.</p>
+<pre class="r"><code>samp_distn&lt;-replicate(5000, {
+  boot_dat &lt;- sample_frac(Teams, replace=T)
+  fit &lt;- lm(W~BA_c*SLG_c*ERA_c, data=boot_dat)
+  coef(fit)
+})
+samp_distn %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
+<pre><code>##   (Intercept)     BA_c    SLG_c     ERA_c BA_c:SLG_c BA_c:ERA_c SLG_c:ERA_c
+## 1   0.2174077 23.95528 9.931375 0.3949983   573.2681   47.22331    18.73028
+##   BA_c:SLG_c:ERA_c
+## 1         1060.305</code></pre>
+<pre class="r"><code>samp_distn %&gt;% t %&gt;% as.data.frame %&gt;% gather %&gt;% group_by(key) %&gt;%
+ summarize(lower=quantile(value,.025), upper=quantile(value,.975))</code></pre>
+<pre><code>## # A tibble: 8 x 3
+##   key                lower  upper
+##   &lt;chr&gt;              &lt;dbl&gt;  &lt;dbl&gt;
+## 1 (Intercept)         80.7   81.5
+## 2 BA_c               117.   208. 
+## 3 BA_c:ERA_c         -83.0  101. 
+## 4 BA_c:SLG_c       -1970.   265. 
+## 5 BA_c:SLG_c:ERA_c -2466.  1592. 
+## 6 ERA_c              -18.1  -16.5
+## 7 SLG_c              216.   255. 
+## 8 SLG_c:ERA_c        -11.3   62.0</code></pre>
+<p>I calculated bootstrapped standard errors of the model. All of these standard errors were very similar to both the original and robust standard errors. I wanted to see if any of the bootstrapped standard errors caused previouslt significant predictors to no longer be significant, so I computed the 95% confidence interval from the bootstrapped standard errors. Of the 3 significant predictors, all had confidence interval ranges that did not include 0, so they all remained significant.</p>
+<pre class="r"><code>mean(Teams$W)</code></pre>
+<pre><code>## [1] 80.97</code></pre>
+<pre class="r"><code>Teams$Wins_Above_Average &lt;- ifelse(Teams$W&gt;80.97,1,0)
+fit2 &lt;- glm(Wins_Above_Average~H+ERA+E, family=&quot;binomial&quot;, data=Teams)
+summary(fit2)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = Wins_Above_Average ~ H + ERA + E, family = &quot;binomial&quot;, 
+##     data = Teams)
+## 
+## Deviance Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -2.44598  -0.42627   0.07127   0.43530   2.48117  
+## 
+## Coefficients:
+##              Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept) -8.971018   2.478955  -3.619 0.000296 ***
+## H            0.024165   0.002378  10.164  &lt; 2e-16 ***
+## ERA         -5.383755   0.471740 -11.413  &lt; 2e-16 ***
+## E           -0.028382   0.008596  -3.302 0.000961 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 830.65  on 599  degrees of freedom
+## Residual deviance: 387.28  on 596  degrees of freedom
+## AIC: 395.28
+## 
+## Number of Fisher Scoring iterations: 6</code></pre>
+<pre class="r"><code>exp(coef(fit2))</code></pre>
+<pre><code>##  (Intercept)            H          ERA            E 
+## 0.0001270388 1.0244590984 0.0045905538 0.9720165282</code></pre>
+<pre class="r"><code>Teams$prob&lt;-predict(fit2,type=&quot;response&quot;)
+table(Truth=Teams$Wins_Above_Average,predict=as.numeric(Teams$prob&gt;.5))%&gt;%addmargins</code></pre>
+<pre><code>##      predict
+## Truth   0   1 Sum
+##   0   240  47 287
+##   1    45 268 313
+##   Sum 285 315 600</code></pre>
+<pre class="r"><code>Accuracy &lt;- (240+268)/600
+Sensitivity &lt;- 268/313
+Specificity &lt;- 240/287
+Precision &lt;- 268/315
+data.frame(&#39;Accuracy&#39;=Accuracy, &#39;Sensitivity&#39;=Sensitivity,&#39;Specificity&#39;=Specificity, &#39;Precision&#39;=Precision)</code></pre>
+<pre><code>##    Accuracy Sensitivity Specificity Precision
+## 1 0.8466667     0.85623   0.8362369 0.8507937</code></pre>
+<pre class="r"><code>Teams$Wins_Above_Average &lt;- (ifelse(Teams$Wins_Above_Average==1,&#39;Y&#39;,&#39;N&#39;))
+Teams$logit&lt;-predict(fit2,type=&quot;link&quot;)
+Teams%&gt;%ggplot()+geom_density(aes(logit,color=Wins_Above_Average,fill=Wins_Above_Average), alpha=.4)+
+  theme(legend.position=c(.85,.85))+geom_vline(xintercept=0)+xlab(&quot;logit (log-odds)&quot;)+
+  geom_rug(aes(logit,color=Wins_Above_Average))+
+  geom_text(x=-3,y=.1,label=&quot;TN = 240&quot;)+
+  geom_text(x=-1.1,y=.01,label=&quot;FN = 45&quot;)+
+  geom_text(x=1.5,y=.01,label=&quot;FP = 47&quot;)+
+  geom_text(x=3,y=.1,label=&quot;TP = 268&quot;)</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>library(plotROC)
+ROCplot&lt;-ggplot(Teams)+geom_roc(aes(d=Wins_Above_Average,m=prob))
+ROCplot</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>calc_auc(ROCplot)</code></pre>
+<pre><code>##   PANEL group       AUC
+## 1     1    -1 0.9341875</code></pre>
+<pre class="r"><code>Teams$Wins_Above_Average &lt;- ifelse(Teams$Wins_Above_Average==&#39;Y&#39;,1,0)
+class_diag&lt;-function(probs,truth){
+  
+  tab&lt;-table(factor(probs&gt;.5,levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+
+  if(is.numeric(truth)==FALSE &amp; is.logical(truth)==FALSE) truth&lt;-as.numeric(truth)-1
+  
+
+  ord&lt;-order(probs, decreasing=TRUE)
+  probs &lt;- probs[ord]; truth &lt;- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup&lt;-c(probs[-1]&gt;=probs[-length(probs)], FALSE)
+  TPR&lt;-c(0,TPR[!dup],1); FPR&lt;-c(0,FPR[!dup],1)
+  
+  n &lt;- length(TPR)
+  auc&lt;- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+  data.frame(acc,sens,spec,ppv,auc)
+}
+
+k=10
+
+data&lt;-Teams[sample(nrow(Teams)),]
+folds&lt;-cut(seq(1:nrow(Teams)),breaks=k,labels=F)
+
+diags&lt;-NULL
+for(i in 1:k){
+  train&lt;-data[folds!=i,] 
+  test&lt;-data[folds==i,]
+  truth&lt;-test$Wins_Above_Average
+  
+ 
+  fit&lt;-glm(Wins_Above_Average~H+ERA+E,data=train,family=&quot;binomial&quot;)
+  probs&lt;-predict(fit,newdata = test,type=&quot;response&quot;)
+  
+
+  diags&lt;-rbind(diags,class_diag(probs,truth))
+}
+
+
+summarize_all(diags,mean)</code></pre>
+<pre><code>##         acc     sens      spec       ppv       auc
+## 1 0.8483333 0.864585 0.8316917 0.8448316 0.9336399</code></pre>
+<p>I first tried to run a logistic regression to see if I could predict world series wins, but the model refused to ever predict a team to win the world series. Therefore, I ran a logistic regression to see whether hits, ERA, and number of errors committed were significant predictors of whether a team had more than an average number of wins. To better interpret the coefficients, I changed the log-odds into odds first. The intercept indicated that a team with 0 hits, 0 ERA, and 0 errors allowed had an odds of having above average wins of 0.000127. The hits coefficient indicated that, controlling for ERA and errors allowed, for every one additional hit, the odds of having above average wins increased by a factor of 1.0244. The ERA coefficient indicated that, controlling for hits and errors committed, every increase in 1 additional ERA point caused the odds of having an above average number of wins to be decreased by a factor of 0.00459 The errors committed coefficient indicated that, controlling for hits and ERA, every one additional error committed caused the odds of having an above average number of wins to be decreased by a factor of 0.97202. The confusion matrix created showed that the model had an accuracy of 84.66%, which means that it correctly classified 84.66% of the cases. The sensitivity was 85.62%, which meant that it correctly classified 85.62% of the above average winning cases. Its specificity was 83.62%, which meant that it correctly classified 83.62% of below average winners. Lastly, the precision was 85.07%, which meant that the model classified above average winners who actually were above average winners 85.07% of the time. A ROC plot was generated, and the AUC was calculated to be 0.93418. This meant that the probability that a randomly selected above average winning team had a higher predicted probability than a randomly selected below average winning team was .93418. This indicates that the model is fitting data well when making predictions. After performing 10-fold cross validation, the AUC was calculated to be .932, which was only a small drop from the original AUC. This meant that the model was not prone to overfitting data. Out-of-sample accuracy was calculated to be 84.5%, sensitivity was 85.29%, and precision was 85.07%. These values are almost identical to the original model values.</p>
+<pre class="r"><code>library(glmnet)
+fit_lasso &lt;- glm(Wins_Above_Average~H+HR+BA+SLG+ERA+E+WSWin, data=Teams, family=&quot;binomial&quot;)
+fit_matrix &lt;- fit_lasso %&gt;% model.matrix()
+fit_matrix &lt;- fit_matrix[,-1]
+fit_response_matrix &lt;- as.matrix(Teams$Wins_Above_Average)
+cv &lt;- cv.glmnet(fit_matrix, fit_response_matrix, family=&quot;binomial&quot;)
+{plot(cv$glmnet.fit, &quot;lambda&quot;, label=TRUE); abline(v = log(cv$lambda.1se)); abline(v = log(cv$lambda.min),lty=2)}</code></pre>
+<p><img src="/project2_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>lasso &lt;- glmnet(fit_matrix, fit_response_matrix, family=&quot;binomial&quot;, lambda=cv$lambda.1se)
+coef(lasso)</code></pre>
+<pre><code>## 8 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                       s0
+## (Intercept) -16.66317953
+## H             .         
+## HR            .         
+## BA           45.54499131
+## SLG          72.22812967
+## ERA          -5.42253640
+## E            -0.02088273
+## WSWinY        .</code></pre>
+<pre class="r"><code>k=10
+data&lt;-Teams[sample(nrow(Teams)),]
+folds&lt;-cut(seq(1:nrow(Teams)),breaks=k,labels=F)
+
+diags&lt;-NULL
+for(i in 1:k){
+  train&lt;-data[folds!=i,] 
+  test&lt;-data[folds==i,]
+  truth&lt;-test$Wins_Above_Average
+  
+ 
+  fit &lt;- glm(Wins_Above_Average~BA+SLG+ERA+E, data=Teams, family=&quot;binomial&quot;)
+  probs&lt;-predict(fit,newdata = test,type=&quot;response&quot;)
+  
+
+  diags&lt;-rbind(diags,class_diag(probs,truth))
+}
+
+
+summarize_all(diags,mean)</code></pre>
+<pre><code>##         acc      sens      spec       ppv      auc
+## 1 0.9216667 0.9285334 0.9158147 0.9238318 0.977846</code></pre>
+<p>Performing a lasso regression indicated that batting average, slugging, ERA, and errors committed should be retained. After performing 10-fold cross validation with this new model, the AUC was calculated to be 0.9758. This is even greater than the original logistic regression AUC of 0.93418. The out-of-sample accuracy was found to be 92.166%, which was higher than the original logistic regression accuracy of 84.66%.</p>
+<pre><code>## R version 3.6.2 (2019-12-12)
+## Platform: x86_64-apple-darwin15.6.0 (64-bit)
+## Running under: macOS Mojave 10.14.6
+## 
+## Matrix products: default
+## BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
+## LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
+## 
+## locale:
+## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+##  [1] glmnet_3.0-2    Matrix_1.2-18   plotROC_2.2.1   lmtest_0.9-37  
+##  [5] zoo_1.8-8       sandwich_2.5-1  tinytex_0.19    forcats_0.4.0  
+##  [9] stringr_1.4.0   dplyr_0.8.4     purrr_0.3.3     readr_1.3.1    
+## [13] tidyr_1.0.2     tibble_2.1.3    ggplot2_3.2.1   tidyverse_1.3.0
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rcpp_1.0.3       lubridate_1.7.4  lattice_0.20-38  foreach_1.5.0   
+##  [5] assertthat_0.2.1 digest_0.6.20    utf8_1.1.4       R6_2.4.0        
+##  [9] cellranger_1.1.0 plyr_1.8.5       backports_1.1.5  reprex_0.3.0    
+## [13] evaluate_0.14    httr_1.4.1       blogdown_0.18    pillar_1.4.3    
+## [17] rlang_0.4.4      lazyeval_0.2.2   readxl_1.3.1     rstudioapi_0.10 
+## [21] rmarkdown_2.1    labeling_0.3     munsell_0.5.0    broom_0.5.4     
+## [25] compiler_3.6.2   modelr_0.1.6     xfun_0.12        pkgconfig_2.0.3 
+## [29] shape_1.4.4      htmltools_0.4.0  tidyselect_1.0.0 bookdown_0.18   
+## [33] codetools_0.2-16 fansi_0.4.1      crayon_1.3.4     dbplyr_1.4.2    
+## [37] withr_2.1.2      grid_3.6.2       nlme_3.1-142     jsonlite_1.6    
+## [41] gtable_0.3.0     lifecycle_0.1.0  DBI_1.1.0        magrittr_1.5    
+## [45] scales_1.1.0     cli_1.1.0        stringi_1.4.3    farver_2.0.3    
+## [49] fs_1.3.1         xml2_1.2.2       ellipsis_0.3.0   generics_0.0.2  
+## [53] vctrs_0.2.3      iterators_1.0.12 tools_3.6.2      glue_1.3.1      
+## [57] hms_0.5.3        yaml_2.2.0       colorspace_1.4-1 rvest_0.3.5     
+## [61] knitr_1.28       haven_2.2.0</code></pre>
+<pre><code>## [1] &quot;2020-05-09 18:46:41 CDT&quot;</code></pre>
+<pre><code>##                                                                                             sysname 
+##                                                                                            &quot;Darwin&quot; 
+##                                                                                             release 
+##                                                                                            &quot;18.7.0&quot; 
+##                                                                                             version 
+## &quot;Darwin Kernel Version 18.7.0: Thu Jan 23 06:52:12 PST 2020; root:xnu-4903.278.25~1/RELEASE_X86_64&quot; 
+##                                                                                            nodename 
+##                                                                          &quot;Anguss-MacBook-Pro.local&quot; 
+##                                                                                             machine 
+##                                                                                            &quot;x86_64&quot; 
+##                                                                                               login 
+##                                                                                       &quot;angusbrooks&quot; 
+##                                                                                                user 
+##                                                                                       &quot;angusbrooks&quot; 
+##                                                                                      effective_user 
+##                                                                                       &quot;angusbrooks&quot;</code></pre>
+
+              <hr>
+              <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div>
+            </div>
+          </div>
+          <hr>
+        <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+        </div>
+      </div>
+      
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

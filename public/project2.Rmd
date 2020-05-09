@@ -12,6 +12,7 @@ tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
 
 ```{R}
 library(tidyverse)
+library(tinytex)
 Teams <- read.csv('Teams.csv')
 Teams <- Teams %>% filter(yearID > 1999)
 Teams<- Teams %>% mutate(BA=(H/AB))
