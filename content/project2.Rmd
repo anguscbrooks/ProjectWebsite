@@ -1,0 +1,237 @@
+---
+title: "Modeling, Testing, and Predicting Project"
+author: "Angus_Brooks"
+date: "4/27/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+```
+
+```{R}
+library(tidyverse)
+library(tinytex)
+Teams <- read.csv('Teams.csv')
+Teams <- Teams %>% filter(yearID > 1999)
+Teams<- Teams %>% mutate(BA=(H/AB))
+colnames(Teams)[18:19] <- c("X2B","X3B")
+Teams <- Teams %>% mutate(H1=H-X2B-X3B-HR)
+Teams <- Teams %>% mutate(SLG=((H1+2*X2B+3*X3B+4*HR)/AB))
+Teams <- Teams %>% select(yearID, franchID,WSWin,W,H,HR,BA,SLG,ERA,E)
+head(Teams)
+```
+For my second project, I decided to continue with the baseball dataset I used in my previous project. I looked at team-wide statistics for each season to see whether world series wins were determined by certain team statistics. I filtered the dataset to only have data from the 2000 season onward (since looking at over 150 years of baseball would be a lot to handle). In the dataset, yearID was the year the baseball season took place (there was 20 seasons worth of data), franchID was the team (30 teams total), WSWin was whether the team won the world series or not (Y means a world series win, N means they did not win the world series), W was the number of wins in the regular season, H was the number of hits in the regular season, HR was the number of homeruns in the regular season, BA was the team batting average in the season, SLG was slugging in the season (it basically calculated how many bases on average you will get during an at-bat), ERA is the earned run average of the team (how many earned runs the team allowed the opponents to score per 9 innings, and E was the number of defensive errors the team committed during the season). Because there were 30 teams and 20 seasons, there are 600 observations each for W,H,HR,BA,SLG,ERA, and E. There are 20 World series winners and 580 teams who did not win the world series.
+
+```{R}
+man1 <- manova(cbind(W,H,HR,BA,SLG,ERA,E)~WSWin, data=Teams)
+summary(man1)
+summary.aov(man1)
+pairwise.t.test(Teams$W,Teams$WSWin,
+                p.adj="none")
+pairwise.t.test(Teams$H,Teams$WSWin,
+                p.adj="none")
+pairwise.t.test(Teams$BA,Teams$WSWin,
+                p.adj="none")
+pairwise.t.test(Teams$SLG,Teams$WSWin,
+                p.adj="none")
+pairwise.t.test(Teams$ERA,Teams$WSWin,
+                p.adj="none")
+pairwise.t.test(Teams$E,Teams$WSWin,
+                p.adj="none")
+1+7 #Number of hypothesis tests performed
+1-(.95)^8
+.05/8 #Corrected critical value
+```
+
+I performed a MANOVA on the 7 numeric variables that were not yearID or franchID. The MANOVA showed that for at least one response variable, the world series winner mean differs from the rest of the teams. (P = 2.555e-06). Because of this significance, I then performed univariate ANOVA's for each of the 7 variables tested. All variables except for number of homeruns showed significant difference between the world series winner mean and the rest of the league's mean. Post-hoc  t-tests were unnecessary because the categorical variable only has two levels (I did include the code on how to perform the t-tests). Since the MANOVA was performed and 7 ANOVA tests were performed, a total of 8 hypothesis tests were conducted. This meant that the probability of at least one Type I error was 1-.95^8 = 0.3365. Therefore, I used a bonferroni correction of .05/8 = 0.00625. This meant that only the significance of the number of errors committed was lost upon correction while the significance of wins, hits, batting average, slugging, and ERA remained. MANOVA tests have lots of assumptions, which makes it hard to meet all of them. The random sample and independent observations assumption was met. Multivariate normality may have not been met as there were only 20 world series winning teams in the dataset. Homogeneity of within-group covariance matrices was possibly not met as there were seven different dependent variables and it is possible that at least one violated the equal variance assumption. Linear relationships among dependent variables was likely met as the general trends of increases in batting statistics would likely increase the number of wins and a decrease in the ERA and errors would likely increase the number of wins. The no extreme outlier assumption was likely met due to baseball seasons being quite long and often many teams are close to one another in terms of stats. The multicollinearity assumption was likely not met as some of the batting variables likely vary together (for example SLG and HR).
+
+```{R}
+Teams_randomization <- Teams %>% select(WSWin, BA)
+Teams%>%group_by(WSWin)%>%
+  summarize(means=mean(BA))%>%summarize(`mean_diff:`=diff(means))
+rand_dist<-vector()
+for(i in 1:5000){
+new<-data.frame(BA=sample(Teams_randomization$BA),WS=Teams_randomization$WSWin)
+rand_dist[i]<-mean(new[new$WS=="Y",]$BA)-
+              mean(new[new$WS=="N",]$BA)}
+{hist(rand_dist,main="Null Distribution",ylab=""); abline(v = 0.01064428	,col="red")}
+mean(rand_dist>0.01064428 | rand_dist< -0.01064428)
+```
+
+I performed a mean difference randomization test to determine whether team batting average differs between world series winners and the rest of the league. The null hypothesis was that the mean batting average was the same for world series winners and non-world series winners. The alternative hypothesis was that the mean batting average was different for world series winners and non-world series winners. I computed a null distribution of 5000 randomized samples and compared the true mean difference of 0.01064428 to the null distribution. The results showed that the P-value was 0, which was less than the alpha cutoff value of 0.05. This meant that I rejected the null hypothesis and concluded that the mean batting average of world series winners was not the same as non-world series winners (world series winners had a roughly .01 higher batting average).
+
+```{R}
+library(sandwich); library(lmtest)
+Teams$BA_c <- Teams$BA - mean(Teams$BA)
+Teams$SLG_c <- Teams$SLG - mean(Teams$SLG)
+Teams$ERA_c <- Teams$ERA - mean(Teams$ERA)
+fit <- lm(W~BA_c*SLG_c*ERA_c, data=Teams)
+summary(fit)
+
+fit1 <- lm(W~BA_c*ERA_c, data=Teams)
+new1<-Teams
+new1$BA_c<-mean(Teams$BA_c)
+new1$mean<-predict(fit1,new1)
+new1$BA_c<-mean(Teams$BA_c)+sd(Teams$BA_c)
+new1$plus.sd<-predict(fit1,new1)
+new1$BA_c<-mean(Teams$BA_c)-sd(Teams$BA_c)
+new1$minus.sd<-predict(fit1,new1)
+newint<-new1%>%select(W,ERA_c,mean,plus.sd,minus.sd)%>%gather(BA,value,-W,-ERA_c)
+
+mycols<-c("#619CFF","#F8766D","#00BA38")
+names(mycols)<-c("-1 sd","mean","+1 sd")
+mycols=as.factor(mycols)
+
+ggplot(Teams,aes(ERA_c,W),group=mycols)+geom_point()+geom_line(data=new1,aes(y=mean,color="mean"))+geom_line(data=new1,aes(y=plus.sd,color="+1 sd"))+geom_line(data=new1,aes(y=minus.sd,color="-1 sd"))+scale_color_manual(values=mycols)+labs(color="BA (cont)")+theme(legend.position=c(.9,.2))
+
+ggplot(Teams) + geom_point(aes(BA_c,W))
+ggplot(Teams) + geom_point(aes(ERA_c,W))
+ggplot(Teams) + geom_point(aes(SLG_c,W))
+
+resids<-lm(W~BA_c*SLG_c*ERA_c, data=Teams)$residuals
+ ggplot()+geom_histogram(aes(resids),bins=10)
+ 
+fitvals<-fit$fitted.values
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, color='red')
+
+coeftest(fit, vcov = vcovHC(fit))
+```
+
+I performed a regression to see if the number of wins can be determined by batting average, slugging, and ERA. The intercept estimate meant that a team with an average batting average, average slugging, and an average ERA would win 81.09 games per season. Since BA and SLG are not whole number variables, I'll interpret them as for every .001 increase to be better understandable. The BA_c coefficient means that, controlling for SLG and ERA, wins increase by .163 for every .001 increase in batting average. The SLG_c coefficient means that, controlling for BA and ERA, wins increase by .235 for every .001 increase in slugging. The ERA_c coefficient means that, controlling for BA and SLG, there is a decrease in wins by 17.266 for every one unit increase in ERA. The interaction coefficients can also be interpreted. The BA_c:SLG_c coefficient indicates that for every one whole unit increase in both BA and SLG, the number of games won decreases by 923.21. The BA_c:ERA_c coefficient indicates that for every one whole unit increase in both BA and ERA, the number of games won increases by 14.62. The SLG_c:ERA_c coefficient indicates that for every one whole unit increase in both SLG and ERA, the number of games won increases by 24.05. And lastly, the BA_c:SLG_c:ERA_c coefficient indicates that for every one whole unit increase in BA, SLG, and ERA, the number of games won decreases by 629.14. For the plot, I decided to use the BA_c and ERA_c predictors to show the regression. The assumption of linearity was confirmed using scatterplots of each predictor against the response variable. All three appeared to be linear. A histogram of the residuals showed that they were normally distributed. Plotting fitted values against residuals and seeing no fanning out showed there was equal variance of the residuals along the regression line. I then computed the regression results with robust standard errors. The results indicated that batting average (P < 5.042e-11), slugging (P < 2.2e-16), and ERA (P < 2.2e-16) were all significant predictors of the number of wins. This outcome was the same in both the original model and the model which used robust standard errors (the only difference being that the p-values were slightly higher but still very significant). In both models, the interactions were not significant. The adjusted R squared value of the model was 0.84, which meant that 84% of the variation in wins was explained by the model.
+
+```{R}
+samp_distn<-replicate(5000, {
+  boot_dat <- sample_frac(Teams, replace=T)
+  fit <- lm(W~BA_c*SLG_c*ERA_c, data=boot_dat)
+  coef(fit)
+})
+samp_distn %>% t %>% as.data.frame %>% summarize_all(sd)
+samp_distn %>% t %>% as.data.frame %>% gather %>% group_by(key) %>%
+ summarize(lower=quantile(value,.025), upper=quantile(value,.975))
+```
+
+I calculated bootstrapped standard errors of the model. All of these standard errors were very similar to both the original and robust standard errors. I wanted to see if any of the bootstrapped standard errors caused previouslt significant predictors to no longer be significant, so I computed the 95% confidence interval from the bootstrapped standard errors. Of the 3 significant predictors, all had confidence interval ranges that did not include 0, so they all remained significant.
+
+```{R}
+mean(Teams$W)
+Teams$Wins_Above_Average <- ifelse(Teams$W>80.97,1,0)
+fit2 <- glm(Wins_Above_Average~H+ERA+E, family="binomial", data=Teams)
+summary(fit2)
+exp(coef(fit2))
+Teams$prob<-predict(fit2,type="response")
+table(Truth=Teams$Wins_Above_Average,predict=as.numeric(Teams$prob>.5))%>%addmargins
+Accuracy <- (240+268)/600
+Sensitivity <- 268/313
+Specificity <- 240/287
+Precision <- 268/315
+data.frame('Accuracy'=Accuracy, 'Sensitivity'=Sensitivity,'Specificity'=Specificity, 'Precision'=Precision)
+
+Teams$Wins_Above_Average <- (ifelse(Teams$Wins_Above_Average==1,'Y','N'))
+Teams$logit<-predict(fit2,type="link")
+Teams%>%ggplot()+geom_density(aes(logit,color=Wins_Above_Average,fill=Wins_Above_Average), alpha=.4)+
+  theme(legend.position=c(.85,.85))+geom_vline(xintercept=0)+xlab("logit (log-odds)")+
+  geom_rug(aes(logit,color=Wins_Above_Average))+
+  geom_text(x=-3,y=.1,label="TN = 240")+
+  geom_text(x=-1.1,y=.01,label="FN = 45")+
+  geom_text(x=1.5,y=.01,label="FP = 47")+
+  geom_text(x=3,y=.1,label="TP = 268")
+
+library(plotROC)
+ROCplot<-ggplot(Teams)+geom_roc(aes(d=Wins_Above_Average,m=prob))
+ROCplot
+calc_auc(ROCplot)
+
+Teams$Wins_Above_Average <- ifelse(Teams$Wins_Above_Average=='Y',1,0)
+class_diag<-function(probs,truth){
+  
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+  
+
+  ord<-order(probs, decreasing=TRUE)
+  probs <- probs[ord]; truth <- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+  TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  
+  n <- length(TPR)
+  auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+  data.frame(acc,sens,spec,ppv,auc)
+}
+
+k=10
+
+data<-Teams[sample(nrow(Teams)),]
+folds<-cut(seq(1:nrow(Teams)),breaks=k,labels=F)
+
+diags<-NULL
+for(i in 1:k){
+  train<-data[folds!=i,] 
+  test<-data[folds==i,]
+  truth<-test$Wins_Above_Average
+  
+ 
+  fit<-glm(Wins_Above_Average~H+ERA+E,data=train,family="binomial")
+  probs<-predict(fit,newdata = test,type="response")
+  
+
+  diags<-rbind(diags,class_diag(probs,truth))
+}
+
+
+summarize_all(diags,mean)
+```
+
+I first tried to run a logistic regression to see if I could predict world series wins, but the model refused to ever predict a team to win the world series. Therefore, I ran a logistic regression to see whether hits, ERA, and number of errors committed were significant predictors of whether a team had more than an average number of wins. To better interpret the coefficients, I changed the log-odds into odds first. The intercept indicated that a team with 0 hits, 0 ERA, and 0 errors allowed had an odds of having above average wins of 0.000127. The hits coefficient indicated that, controlling for ERA and errors allowed, for every one additional hit, the odds of having above average wins increased by a factor of 1.0244. The ERA coefficient indicated that, controlling for hits and errors committed, every increase in 1 additional ERA point caused the odds of having an above average number of wins to be decreased by a factor of 0.00459 The errors committed coefficient indicated that, controlling for hits and ERA, every one additional error committed caused the odds of having an above average number of wins to be decreased by a factor of 0.97202. The confusion matrix created showed that the model had an accuracy of 84.66%, which means that it correctly classified 84.66% of the cases. The sensitivity was 85.62%, which meant that it correctly classified 85.62% of the above average winning cases. Its specificity was 83.62%, which meant that it correctly classified 83.62% of below average winners. Lastly, the precision was 85.07%, which meant that the model classified above average winners who actually were above average winners 85.07% of the time. A ROC plot was generated, and the AUC was calculated to be 0.93418. This meant that the probability that a randomly selected above average winning team had a higher predicted probability than a randomly selected below average winning team was .93418. This indicates that the model is fitting data well when making predictions. After performing 10-fold cross validation, the AUC was calculated to be .932, which was only a small drop from the original AUC. This meant that the model was not prone to overfitting data. Out-of-sample accuracy was calculated to be 84.5%, sensitivity was 85.29%, and precision was 85.07%. These values are almost identical to the original model values.
+
+```{R}
+library(glmnet)
+fit_lasso <- glm(Wins_Above_Average~H+HR+BA+SLG+ERA+E+WSWin, data=Teams, family="binomial")
+fit_matrix <- fit_lasso %>% model.matrix()
+fit_matrix <- fit_matrix[,-1]
+fit_response_matrix <- as.matrix(Teams$Wins_Above_Average)
+cv <- cv.glmnet(fit_matrix, fit_response_matrix, family="binomial")
+{plot(cv$glmnet.fit, "lambda", label=TRUE); abline(v = log(cv$lambda.1se)); abline(v = log(cv$lambda.min),lty=2)}
+lasso <- glmnet(fit_matrix, fit_response_matrix, family="binomial", lambda=cv$lambda.1se)
+coef(lasso)
+
+k=10
+data<-Teams[sample(nrow(Teams)),]
+folds<-cut(seq(1:nrow(Teams)),breaks=k,labels=F)
+
+diags<-NULL
+for(i in 1:k){
+  train<-data[folds!=i,] 
+  test<-data[folds==i,]
+  truth<-test$Wins_Above_Average
+  
+ 
+  fit <- glm(Wins_Above_Average~BA+SLG+ERA+E, data=Teams, family="binomial")
+  probs<-predict(fit,newdata = test,type="response")
+  
+
+  diags<-rbind(diags,class_diag(probs,truth))
+}
+
+
+summarize_all(diags,mean)
+```
+
+Performing a lasso regression indicated that batting average, slugging, ERA, and errors committed should be retained. After performing 10-fold cross validation with this new model, the AUC was calculated to be 0.9758. This is even greater than the original logistic regression AUC of 0.93418. The out-of-sample accuracy was found to be 92.166%, which was higher than the original logistic regression accuracy of 84.66%.
+
+```{R, echo=F}
+sessionInfo()
+Sys.time()
+Sys.info()
+```

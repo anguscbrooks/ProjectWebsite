@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Angus&#39;s Portfolio</title>
+    <link>/</link>
+    <description>Recent content on Angus&#39;s Portfolio</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Sun, 02 Oct 2016 22:55:05 -0400</lastBuildDate>
+    
+	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Projects</title>
+      <link>/projects/</link>
+      <pubDate>Sun, 02 Oct 2016 22:55:05 -0400</pubDate>
+      
+      <guid>/projects/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Hello R Markdown</title>
+      <link>/blog/2015-07-23-r-rmarkdown/</link>
+      <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
+      
+      <guid>/blog/2015-07-23-r-rmarkdown/</guid>
+      <description>R Markdown This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
+You can embed an R code chunk like this:
+summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 26.00 ## Median :15.0 Median : 36.00 ## Mean :15.4 Mean : 42.98 ## 3rd Qu.</description>
+    </item>
+    
+    <item>
+      <title>Creating a New Theme</title>
+      <link>/blog/creating-a-new-theme/</link>
+      <pubDate>Sun, 28 Sep 2014 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/creating-a-new-theme/</guid>
+      <description>Introduction This tutorial will show you how to create a simple theme in Hugo. I assume that you are familiar with HTML, the bash command line, and that you are comfortable using Markdown to format content. I&amp;rsquo;ll explain how Hugo uses templates and how you can organize your templates to create a theme. I won&amp;rsquo;t cover using CSS to style your theme.
+We&amp;rsquo;ll start with creating a new site with a very basic template.</description>
+    </item>
+    
+    <item>
+      <title>(Hu)go Template Primer</title>
+      <link>/blog/goisforlovers/</link>
+      <pubDate>Wed, 02 Apr 2014 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/goisforlovers/</guid>
+      <description>Hugo uses the excellent go html/template library for its template engine. It is an extremely lightweight engine that provides a very small amount of logic. In our experience that it is just the right amount of logic to be able to create a good static website. If you have used other template systems from different languages or frameworks you will find a lot of similarities in go templates.
+This document is a brief primer on using go templates.</description>
+    </item>
+    
+    <item>
+      <title>Getting Started with Hugo</title>
+      <link>/blog/hugoisforlovers/</link>
+      <pubDate>Wed, 02 Apr 2014 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/hugoisforlovers/</guid>
+      <description>Step 1. Install Hugo Goto hugo releases and download the appropriate version for your os and architecture.
+Save it somewhere specific as we will be using it in the next step.
+More complete instructions are available at installing hugo
+Step 2. Build the Docs Hugo has its own example site which happens to also be the documentation site you are reading right now.
+Follow the following steps:
+ Clone the hugo repository Go into the repo Run hugo in server mode and build the docs Open your browser to http://localhost:1313  Corresponding pseudo commands:</description>
+    </item>
+    
+    <item>
+      <title>Migrate to Hugo from Jekyll</title>
+      <link>/blog/migrate-from-jekyll/</link>
+      <pubDate>Mon, 10 Mar 2014 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/migrate-from-jekyll/</guid>
+      <description>Move static content to static Jekyll has a rule that any directory not starting with _ will be copied as-is to the _site output. Hugo keeps all static content under static. You should therefore move it all there. With Jekyll, something that looked like
+▾ &amp;lt;root&amp;gt;/ ▾ images/ logo.png  should become
+▾ &amp;lt;root&amp;gt;/ ▾ static/ ▾ images/ logo.png  Additionally, you&amp;rsquo;ll want any files that should reside at the root (such as CNAME) to be moved to static.</description>
+    </item>
+    
+    <item>
+      <title>Data_Visualization_Project</title>
+      <link>/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project1/</guid>
+      <description>library(tidyverse) Batting &amp;lt;- read.csv(&amp;#39;Batting.csv&amp;#39;) Teams &amp;lt;- read.csv(&amp;#39;Teams.csv&amp;#39;) Salaries &amp;lt;- read.csv(&amp;#39;Salaries.csv&amp;#39;) People &amp;lt;- read.csv(&amp;#39;People.csv&amp;#39;) glimpse(Batting) ## Observations: 107,429 ## Variables: 22 ## $ playerID &amp;lt;fct&amp;gt; abercda01, addybo01, allisar01, allisdo01, ansonca01, armstb… ## $ yearID &amp;lt;int&amp;gt; 1871, 1871, 1871, 1871, 1871, 1871, 1871, 1871, 1871, 1871, … ## $ stint &amp;lt;int&amp;gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, … ## $ teamID &amp;lt;fct&amp;gt; TRO, RC1, CL1, WS3, RC1, FW1, RC1, BS1, FW1, BS1, CL1, CL1, … ## $ lgID &amp;lt;fct&amp;gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, … ## $ G &amp;lt;int&amp;gt; 1, 25, 29, 27, 25, 12, 1, 31, 1, 18, 22, 1, 10, 3, 20, 29, 1… ## $ AB &amp;lt;int&amp;gt; 4, 118, 137, 133, 120, 49, 4, 157, 5, 86, 89, 3, 36, 15, 94,… ## $ R &amp;lt;int&amp;gt; 0, 30, 28, 28, 29, 9, 0, 66, 1, 13, 18, 0, 6, 7, 24, 26, 0, … ## $ H &amp;lt;int&amp;gt; 0, 32, 40, 44, 39, 11, 1, 63, 1, 13, 27, 0, 7, 6, 33, 32, 0,… ## $ X2B &amp;lt;int&amp;gt; 0, 6, 4, 10, 11, 2, 0, 10, 1, 2, 1, 0, 0, 0, 9, 3, 0, 0, 1, … ## $ X3B &amp;lt;int&amp;gt; 0, 0, 5, 2, 3, 1, 0, 9, 0, 1, 10, 0, 0, 0, 1, 3, 0, 0, 1, 0,… ## $ HR &amp;lt;int&amp;gt; 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0, 0, … ## $ RBI &amp;lt;int&amp;gt; 0, 13, 19, 27, 16, 5, 2, 34, 1, 11, 18, 0, 1, 5, 21, 23, 0, … ## $ SB &amp;lt;int&amp;gt; 0, 8, 3, 1, 6, 0, 0, 11, 0, 1, 0, 0, 2, 2, 4, 4, 0, 0, 3, 0,… ## $ CS &amp;lt;int&amp;gt; 0, 1, 1, 1, 2, 1, 0, 6, 0, 0, 1, 0, 0, 0, 0, 4, 0, 0, 1, 0, … ## $ BB &amp;lt;int&amp;gt; 0, 4, 2, 0, 2, 0, 1, 13, 0, 0, 3, 1, 2, 0, 2, 9, 0, 0, 4, 1,… ## $ SO &amp;lt;int&amp;gt; 0, 0, 5, 2, 1, 1, 0, 1, 0, 0, 4, 0, 0, 0, 2, 2, 3, 0, 2, 0, … ## $ IBB &amp;lt;int&amp;gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, … ## $ HBP &amp;lt;int&amp;gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, … ## $ SH &amp;lt;int&amp;gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, … ## $ SF &amp;lt;int&amp;gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, … ## $ GIDP &amp;lt;int&amp;gt; 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 1, 2, 0, 0, 0, 0, … glimpse(Teams) ## Observations: 2,925 ## Variables: 48 ## $ yearID &amp;lt;int&amp;gt; 1871, 1871, 1871, 1871, 1871, 1871, 1871, 1871, 1871, … ## $ lgID &amp;lt;fct&amp;gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA… ## $ teamID &amp;lt;fct&amp;gt; BS1, CH1, CL1, FW1, NY2, PH1, RC1, TRO, WS3, BL1, BR1,… ## $ franchID &amp;lt;fct&amp;gt; BNA, CNA, CFC, KEK, NNA, PNA, ROK, TRO, OLY, BLC, ECK,… ## $ divID &amp;lt;fct&amp;gt; , , , , , , , , , , , , , , , , , , , , , , , , , ## $ Rank &amp;lt;int&amp;gt; 3, 2, 8, 7, 5, 1, 9, 6, 4, 2, 9, 6, 1, 7, 8, 3, 4, 5, … ## $ G &amp;lt;int&amp;gt; 31, 28, 29, 19, 33, 28, 25, 29, 32, 58, 29, 37, 48, 22… ## $ Ghome &amp;lt;int&amp;gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA… ## $ W &amp;lt;int&amp;gt; 20, 19, 10, 7, 16, 21, 4, 13, 15, 35, 3, 9, 39, 6, 5, … ## $ L &amp;lt;int&amp;gt; 10, 9, 19, 12, 17, 7, 21, 15, 15, 19, 26, 28, 8, 16, 1… ## $ DivWin &amp;lt;fct&amp;gt; , , , , , , , , , , , , , , , , , , , , , , , , , ## $ WCWin &amp;lt;fct&amp;gt; , , , , , , , , , , , , , , , , , , , , , , , , , ## $ LgWin &amp;lt;fct&amp;gt; N, N, N, N, N, Y, N, N, N, N, N, N, Y, N, N, N, N, N, … ## $ WSWin &amp;lt;fct&amp;gt; , , , , , , , , , , , , , , , , , , , , , , , , , ## $ R &amp;lt;int&amp;gt; 401, 302, 249, 137, 302, 376, 231, 351, 310, 617, 152,… ## $ AB &amp;lt;int&amp;gt; 1372, 1196, 1186, 746, 1404, 1281, 1036, 1248, 1353, 2… ## $ H &amp;lt;int&amp;gt; 426, 323, 328, 178, 403, 410, 274, 384, 375, 753, 248,… ## $ X2B &amp;lt;int&amp;gt; 70, 52, 35, 19, 43, 66, 44, 51, 54, 106, 29, 35, 107, … ## $ X3B &amp;lt;int&amp;gt; 37, 21, 40, 8, 21, 27, 25, 34, 26, 31, 9, 10, 30, 5, 9… ## $ HR &amp;lt;int&amp;gt; 3, 10, 7, 2, 1, 9, 3, 6, 6, 14, 0, 1, 7, 0, 2, 4, 4, 5… ## $ BB &amp;lt;int&amp;gt; 60, 60, 26, 33, 33, 46, 38, 49, 48, 29, 18, 19, 29, 17… ## $ SO &amp;lt;int&amp;gt; 19, 22, 25, 9, 15, 23, 30, 19, 13, 28, 40, 25, 26, 13,… ## $ SB &amp;lt;int&amp;gt; 73, 69, 18, 16, 46, 56, 53, 62, 48, 53, 8, 19, 48, 12,… ## $ CS &amp;lt;int&amp;gt; 16, 21, 8, 4, 15, 12, 10, 24, 13, 18, 13, 16, 14, 3, 7… ## $ HBP &amp;lt;int&amp;gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA… ## $ SF &amp;lt;int&amp;gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA… ## $ RA &amp;lt;int&amp;gt; 303, 241, 341, 243, 313, 266, 287, 362, 303, 434, 413,… ## $ ER &amp;lt;int&amp;gt; 109, 77, 116, 97, 121, 137, 108, 153, 137, 166, 160, 1… ## $ ERA &amp;lt;dbl&amp;gt; 3.</description>
+    </item>
+    
+  </channel>
+</rss>

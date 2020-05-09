@@ -1,0 +1,190 @@
+---
+title: "Data_Visualization_Project"
+author: "Angus_Brooks"
+date: "3/8/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+```
+
+
+```{R}
+library(tidyverse)
+Batting <- read.csv('Batting.csv')
+Teams <- read.csv('Teams.csv')
+Salaries <- read.csv('Salaries.csv')
+People <- read.csv('People.csv')
+
+glimpse(Batting)
+glimpse(Teams)
+glimpse(Salaries)
+glimpse(People)
+
+```
+
+For my project, I decided to dive into the world of baseball. I grew up playing baseball and remain an avid baseball fan to this day. As it so happens, many statisticians also love baseball and have dutifully kept in-depth statistics of teams and players since the inception of the game in the 1800's. Luckily for me, a journalist named Sean Lahman created a website where people compile different baseball datasets. I found 4 different datasets created by different authors that I used to combine together for my project. One dataset, "Batting", contains information on hitting statistics for all hitters in the major leagues since 1871. The statistics include the player's unique ID, games played, number of hits, number of homeruns, number of strikeouts, etc. The dataset "Salaries" contains the amount of money each player has been paid per year between 1985 and 2016. The "Teams" dataset contains information on the performance of each team as a whole per year since 1871. The dataset includes variables such as the rank in the division, the number of runs scored, the number of hits (including the number of doubles, triples, homeruns), ERA of pitchers, and overall fan attendance. The "People" dataset gives personal information of all the players such as birth and death year, full name, place of birth, height, weight, and major league debut date. When joined, the dataset will contain information about player performance, pay, and physical characteristics as well as team statistics. I expect to find that player performance (batting average, number of homeruns) will be positively correlated with pay because, in theory, better players are paid more money. I also expect to find that teams with high batting averages or low ERA's tend to perform better than other teams and win more world series due simply to scoring more or preventing the other team from scoring.
+
+```{R}
+Joined_data <- left_join(Batting, Salaries, by= c("playerID", "yearID", "teamID", "lgID"))%>%
+  left_join(People, by="playerID") %>% left_join(Teams, by=c("yearID", "teamID", "lgID"),
+  suffix=c(".player", ".team"))
+```
+
+I joined the four datasets together to create a singular dataset that shows the per year performance of players and teams as well as personal player information. I performed the join through using left joins, starting with Batting as the main dataset. Starting with Batting made the most sense because all of the individual players each year join together to form teams. This means that player stats should be listed before team statistics. My first join was to attach yearly salary information to each player. Salaries were available only from 1985 forward (and only for players who spent enough time in the majors to have a major league contract) so only roughly a quarter of all total players had salary information. I then used another left join to attach biographical information for each player using each player's unique ID. I then used a left join to attach team information onto each player using the unique ID of each player and the team ID for which he played. Left joins were used in order to attach information onto player ID's and drop any extraneous information (which was not a problem since the information was nearly completely comprehensive).
+
+```{R}
+Joined_data_2010_newer <- Joined_data %>% filter(yearID >= 2010)
+
+Joined_data_2010_newer %>% filter(AB.player > 100) %>% group_by(teamID, yearID)%>%
+  summarize(mean_salary = mean(salary, na.rm=T), median_salary=median(salary, na.rm=T)) %>%
+  na.omit() %>% arrange(yearID, desc(mean_salary))
+
+Joined_data_2010_newer <- Joined_data_2010_newer %>% mutate(Batting_Average.player =
+                                                              H.player/AB.player)
+Joined_data_2010_newer <- Joined_data_2010_newer %>% mutate(Batting_Average.team =
+                                                              H.team/AB.team)
+
+Joined_data_2010_newer %>% filter(AB.player > 100) %>%
+  select(teamID, yearID, playerID, Batting_Average.player, Batting_Average.team, salary) %>%
+  group_by(teamID, yearID) %>% summarize(mean_batting_avg=mean(Batting_Average.player), 
+  sd_batting_average=sd(Batting_Average.player), salary_mean=mean(salary, na.rm=T)) %>%
+  arrange(yearID, desc(salary_mean))
+
+Joined_data_2010_newer %>% 
+  summarize(mean_salary=mean(salary, na.rm=T), sd_salary=sd(salary, na.rm=T))
+
+Joined_data_2010_newer %>% 
+  filter(AB.player >100) %>%
+  summarize(mean_salary=mean(salary, na.rm=T), sd_salary=sd(salary, na.rm=T))
+
+Joined_data_2010_newer %>%select(Batting_Average.player, salary, HR.player, SB.player, weight, height) %>%
+  drop_na(Batting_Average.player, salary) %>% cor()
+
+Joined_data_2010_newer %>% filter(AB.player > 100) %>% summarize(mean(HR.player))
+Joined_data_2010_newer %>% filter(AB.player >100) %>% summarize(max(HR.player))
+Joined_data_2010_newer %>% filter(HR.player == 59)
+Joined_data %>% summarize(max(HR.player))
+Joined_data %>% filter(HR.player == 73)
+Joined_data %>% filter(HR.player == 73) %>% summarize(AB.player/HR.player)
+
+Joined_data_2010_newer %>% group_by(teamID) %>%
+  summarize(mean_attendance=mean(attendance), mean_wins=mean(W)) %>%
+  arrange(desc(mean_attendance))
+
+Joined_data_2010_newer_longer <- Joined_data_2010_newer %>%
+  pivot_longer(c("X2B.player", "X3B.player", "HR.player"), names_to="Extra_Base_Hit_Type", 
+  values_to="Extra_Base_Hit_Number")
+
+Joined_data_2010_newer_longer %>% filter(AB.player >100)%>%
+  group_by(teamID, yearID, Extra_Base_Hit_Type) %>%
+  summarize(mean(Extra_Base_Hit_Number))
+
+Joined_data_2010_newer %>% mutate(player_age=yearID-birthYear) %>%
+  group_by(teamID, yearID, birthCountry) %>%
+  summarize(mean_age=mean(player_age), n(), min(player_age), max(player_age))
+
+Joined_data_2010_newer %>% filter(AB.player > 100) %>%
+  group_by(birthCountry) %>% summarize(number_of_players=n()) %>%
+  mutate(proportion_of_players=number_of_players/sum(number_of_players))
+```
+
+Before exploring the data, I first filtered the data to only be from 2010 onwards in order to have a better understanding of today's game (salaries were much different before 2010, homeruns in the steroid era were common, etc.). Also, most of the statistics were calculated after first filtering out players with less than 100 at bats (I did this because players with few at bats were generally rookie players who were called up to the major leagues for only a few games and would have stats that would be skewed). The first statistic I calculated was the yearly mean and median player salary for each team. Unsurprisingly, the Yankees tended to spend the most money in baseball. Also, the mean tended to be much higher than the median, which indicated that there was a large skew (most likely due to a few players being paid lots of money skewing right). I then attempted to determine if mean salary was related to mean batting average, but it appeared that there was not a strong relationship between the two. I then calculated the mean and standard deviation of salary with and without the players with less than 100 at bats factored in. When players with less than 100 at bats were included, the mean salary decreased, which was in line with my prediction that players with less than 100 at bats would be low payed rookies or recently called up minor leaguers. I then calculated a correlation matrix to figure out the relationships between different numeric variables. Interestingly, it appears that batting average and salary have almost no relationship. Although number of homeruns and salary have a weak positive correlation, I thought that the relationship would be stronger. I then calculated the mean number of homeruns per player, which made me interested to figure out what was the most homeruns hit in a single season by a player. I discovered that in the previous 10 seasons, Giancarlo Stanton holds the record with 59 homeruns hit in 2017. I then figured out who hit the most homeruns in a single season ever. That title is held by Barry Bonds, who hit 73 homeruns in 2001. I calculated that he hit a homerun every 6.52 at bats. 
+
+Next, I wanted to visualize how teams hit extra base hits (doubles, triples, homeruns). I did this by using the pivot_longer function. I took the "X2B.player", "X3B.player", and "HR.player" variables and pivoted them longer to form the categories of the Extra_Base_Hit_Type variable. THe previous values were pivoted into the "Extra_Base_Hit_Number"" variable. I was then able to group by team, year, and type of extra base hit, then easily calculate the mean of each type of hit. Lastly, I wanted to understand the age and nationality distribution of the major leagues. I grouped by team, year, and birth country of players and then found the mean age, minimum age, maximum age, and the number of players from each country. I was interested to see several countries that are not traditionally associated with baseball (Germany for example) have players in the major leagues. I then calculated the proportions of players across the previous 10 years based on their nationalities. I found that the vast majority (nearly 70%) of players are from the United States.
+
+```{R}
+Joined_data_cor <- Joined_data_2010_newer %>%
+  filter(AB.player > 100) %>%
+  select(7:14, salary, height, weight, SO.player, W) %>% drop_na(salary)
+
+tidycor<-cor(Joined_data_cor)%>%as.data.frame%>%
+  rownames_to_column%>%
+  pivot_longer(-1,names_to="name",values_to="correlation")
+
+tidycor%>%ggplot(aes(rowname,name,fill=correlation))+
+  geom_tile()+
+  scale_fill_gradient2(low="red",mid="white",high="blue")+
+  geom_text(aes(label=round(correlation,2)),color = "black", size = 2)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  coord_fixed()+
+  xlab("First Variable") + ylab("Second Variable")+
+  ggtitle("Correlation Heatmap")+
+  theme(plot.title = element_text(hjust=0.5))
+  
+```
+Because there are so many numeric variables in my dataset, I decided to narrow the correlation heatmap down to 13 varaibles. Some of the obvious correlations that result are that height and weight have a moderate positive correlation of 0.57, hits and at bats have a very strong positive correlation of almost 1 (because the more at bats you have, the more hits you are likely to get), and that hits are strongly positively correlated with RBI (because the more hits you get, the more runners you will drive in). I found it interesting that the most negative correlation on the chart is between weight and number of stolen bases. It makes sense because larger players generally tend to move more slowly and would thus be caught stealing nearly every time. While I thought that salary would be most strongly positively correlated to number of homeruns (due to fans of this era of baseball loving homeruns), it actually turns out that the number of runs batted in by a player is most strongly correlated with salary (homeruns came in second). Lastly, I found that the number of stolen bases and the number of triples hit by a player are moderately positively correlated. This makes sense because only the most fast players are able to hit triples and therefore would have more stolen bases simply due to being very fast.
+
+```{R}
+Joined_data_2010_newer_filtered_AB <- Joined_data_2010_newer %>%
+  filter(AB.player >100, yearID ==2019)
+
+ggplot(Joined_data_2010_newer_filtered_AB, aes(x = teamIDBR, fill = lgID))+
+  geom_bar(aes(y=HR.player), stat="summary", fun.y="mean")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  coord_fixed()+
+  geom_errorbar(fun.data='mean_se',stat="summary", aes(y=HR.player, width = 0.5))+
+  xlab("Team Name (abbreviated)") + ylab("Mean Homeruns Per Player")+
+  ggtitle("2019 Homerun Averages")+
+  theme(plot.title = element_text(hjust=0.5))+
+  labs(fill = "League")+
+  scale_fill_manual(values=c('red2','royalblue4'))
+```
+I decided to see how many homeruns the average player on each team hit in the 2019 season. While the Oakland A's did not lead the league in total homeruns (that distinction belongs to the Minnesota Twins), they did have the most homeruns per player. This is likely due to not having a few outstanding sluggers and instead having players throughout the lineup who can hit homeruns. It was interesting to note that the top 5 teams in mean homeruns per player all made it to the playoffs. This means that perhaps homeruns are the way for teams to win games. It is interesting to note that the eventual world series champion, the Washington Nationals, came in 11th place in terms of mean homeruns per player. This may indicate that while homeruns are an effective way to win in the regular season, relying on homeruns when the other team's pitching is good (which is the case in the playoffs) may be counterproductive. I wanted to see how the mean homeruns varied based on the league the team is in. In the National League, pitchers (who are not great hitter) are required to bat, which could result in less homeruns per player. This appears to be a factor since 4 of the top 5 teams in the major leagues are from the American League (where pitchers are replaced with a designated hitter who is usually a power hitter).
+
+```{R}
+Joined_data_2010_newer_filtered <- Joined_data_2010_newer %>% filter (AB.player >100, lgID =='AL', divID=='E')
+
+ggplot(data=Joined_data_2010_newer_filtered, aes(yearID, Batting_Average.player))+
+  geom_point(aes(color = teamIDBR), size=.5)+
+  geom_step(aes(color = teamIDBR),size=1, stat = "summary", fun.y = "mean")+
+  geom_step( stat = 'summary', fun.y = 'mean')+
+  labs(y="Batting Average", x="Year", color="Team Name")+
+  ggtitle("AL East Batting Averages 2010-2019")+
+  scale_color_manual(values=c('orange','red2','navyblue','darkslategray2','slategray'))+
+  scale_x_continuous(breaks=seq(2010,2019,1))+
+  scale_y_continuous(breaks=seq(.200,.300,.010))+
+  ylim(.200,.300)+
+  theme(plot.title = element_text(hjust=0.5))
+```
+In this plot, I wanted to see how the batting averages of teams in the American League East differed over the 2010-2019 seasons. Interestingly, the team with the highest batting average in the division only won the division 60% of the time (the 2010 Tampa Bay Rays had the lowest batting average and won the division). It makes sense that a rebuilding Yankees team between 2013 and 2015 would have the lowest batting average in the division. The Red Sox, with 4 divison wins in the previous 10 season (the most of any AL East team), tend to trend toward the top of the division in terms of batting average. Although one would think the team with the best batting average would be the team that wins the division every year, this does not appear to be the best predictor of success based on the data.
+
+```{R}
+library(cluster)
+Joined_data_2010_newer_filtered <- Joined_data_2010_newer %>%
+  filter (AB.player >100) %>% drop_na(salary)
+pam_dat <-Joined_data_2010_newer_filtered %>%
+  select(SB.player, HR.player, salary) %>% scale
+sil_width<-vector()
+for(i in 2:10){
+  pam_fit <- pam(pam_dat, k = i)
+  sil_width[i] <- pam_fit$silinfo$avg.width
+}
+ggplot()+geom_line(aes(x=1:10,y=sil_width))+scale_x_continuous(name="k",breaks=1:10)
+
+
+pam2 <- Joined_data_2010_newer_filtered %>%
+  select(SB.player, HR.player, salary) %>%
+  scale %>% pam(5)
+head(pam2)
+
+
+Joined_data_2010_newer_filtered <- Joined_data_2010_newer_filtered %>%
+  mutate(SB_category=cut(SB.player, breaks=c(-Inf,2,10,Inf),labels=c('low','middle','high')))
+final<-Joined_data_2010_newer_filtered%>%mutate(cluster=as.factor(pam2$clustering))
+ggplot(final, aes(x=salary,y=HR.player, color=cluster, shape=SB_category))+geom_point()+
+  scale_x_continuous(breaks=seq(0,35000000,1000000, labels=scales::comma))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  scale_y_continuous(breaks=seq(0,70,10))+
+  ggtitle("Clustering Analysis")+
+  labs(x="Salary ($)", y="Number of Homeruns", shape="Stolen Base Category", color="Cluster")
+
+```
+
+Because my data had so many numeric variables, I chose to cluster based on three that I thought would be interesting: Number of homeruns, salary, and number of stolen bases. To begin, I needed to determine the number of clusters that would best suit the data. I filtered by players with more than 100 at bats, dropped the NA's that were present in salary, and scaled to generate my pam data. I then used that data in a for loop to determine the silhouette width within clusters for clusters between 2 and 10. I found that the elbow was at 5 clusters, which means that using 5 clusters would produce the tightest results. I then ran pam with 5 clusters and and plotted the clusters on a ggplot. The ggplot, which had salary on the X-axis, homeruns on the Y-axis, color by cluster, and shape by stolen base category (I divided the number of stolen bases of each player into low, medium, and high categories to better visualize it. Low was 2 or less stolen bases, medium was 2 to 10 stolen bases, and high was anything more than 10 stolen bases). The results indicated that the five clusters consisted of players with a very high salary, players with lots of stolen bases, players with lots of home runs, players who are very low on all three values, and players who make a small salary, hit a moderate number of homeruns, and steal a few bases. Overall, the data indicates that players being paid a lot of money tend to steal few bases and hit a good number of homeruns. Stolen bases are not compensated very well in terms of salary. Interestingly, there does not appear to be an incredibly strong connection between players hitting lots of homeruns getting paid well. This could be because a power hitting rookie can hit many homeruns but still be paid a low amount of money. Overall, it appears that a number of other factors (fielding, situational hitting, jersey sales, etc.) play a role in determining the salary of a player.
+
+
+
+
