@@ -1,7 +1,6 @@
 ---
 title: "Data_Visualization_Project"
 author: "Angus_Brooks"
-date: "3/8/2020"
 output: pdf_document
 ---
 

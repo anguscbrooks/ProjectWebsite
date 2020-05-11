@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Resume2s on Angus&#39;s Portfolio</title>
+    <link>/resume2/</link>
+    <description>Recent content in Resume2s on Angus&#39;s Portfolio</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    
+	<atom:link href="/resume2/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title></title>
+      <link>/resume2/resume2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/resume2/resume2/</guid>
+      <description> Some stuff about me  I poisoned myself doing research. I was the first woman to win a Nobel prize I was the first person and only woman to win a Nobel prize in two different sciences.   Education  Nobel Prizes  Publications 
+ </description>
+    </item>
+    
+  </channel>
+</rss>

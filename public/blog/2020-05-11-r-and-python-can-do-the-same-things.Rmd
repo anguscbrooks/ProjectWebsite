@@ -1,0 +1,9 @@
+---
+title: R and Python Can do the Same Things
+author: Angus Brooks
+date: '2020-05-11'
+slug: r-and-python-can-do-the-same-things
+categories: []
+tags: []
+description: ''
+---

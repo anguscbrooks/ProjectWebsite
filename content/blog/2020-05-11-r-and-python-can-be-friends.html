@@ -1,0 +1,33 @@
+---
+title: R and Python can be Friends
+author: Angus Brooks
+date: '2020-05-11'
+slug: r-and-python-can-be-friends
+categories: []
+tags: []
+description: ''
+---
+
+
+
+<p>When two people do not speak the same language, it is impossible for the people to understand each other. This can lead to lots of frustration. Luckily, when a translator is present, the problem goes away and communication is easy. Now what if i told you that this hypothetical language barrier was between two coding languages? That’s right, I’m talking about mortal enemies R and Python. But now, thanks to the translator that is the reticulate package, you can code in both R and python in the same script!</p>
+<p>How does it work?
+It’s easy! Now i know you must be thinking this (because it’s never easy): <img src="/blog/2020-05-11-r-and-python-can-be-friends_files/liar.GIF" />
+(I really hope you enjoy star wars prequel memes)…but it truly is easy! All you have to do is load the reticulate package!</p>
+<pre class="r"><code>library(reticulate)</code></pre>
+<p>That was easy! Now let’s see how the two can get along. First thing to do is to create a code chunk for a variable in R.</p>
+<pre class="r"><code>R_chunk &lt;- 13</code></pre>
+<p>Next, let’s make a code chunk for a variable in Python.</p>
+<pre class="python"><code>python_chunk = 7</code></pre>
+<p>Wow! Compelling stuff. Bet you’re on the edge of your seat right now. Well now’s the moment of truth. The big reveal. If using an R code chunk, you simply put a “py$”&quot; in front of whatever the python varaible is.</p>
+<pre class="r"><code>R_chunk + py$python_chunk</code></pre>
+<pre><code>## [1] 20</code></pre>
+<p>There you have it! The 7 R value and the 13 python value added up to 20. As simple as it seems, without reticulate the computer would not be able to do this. But that’s not all! You can even use reticulate in a python chunk by putting “r.” in front of the variable name</p>
+<pre class="python"><code>print(r.R_chunk + python_chunk)</code></pre>
+<pre><code>## 20.0</code></pre>
+<p>Although this example used numbers, you can combine words too! Check this out!</p>
+<pre class="python"><code>What_is = &quot;Computational&quot;</code></pre>
+<pre class="r"><code>my_favorite_class &lt;- &quot;Biology&quot;
+cat(c(py$What_is,my_favorite_class))</code></pre>
+<pre><code>## Computational Biology</code></pre>
+<p>Wow! Bet you didn’t see that overt pandering coming! But in reality, the ability to combine R and python together using the reticulate library means that if you prefer wrangling data in R but prefer analysis in Python, you can easily combine the two together. That means you can mix and match your preferred ways to save time and energy (because let’s face it, coding can sometimes be tough)!</p>
