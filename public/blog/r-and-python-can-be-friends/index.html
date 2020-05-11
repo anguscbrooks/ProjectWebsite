@@ -81,10 +81,10 @@ It’s easy! Now i know you must be thinking this (because it’s never easy): <
 <pre class="r"><code>R_chunk &lt;- 13</code></pre>
 <p>Next, let’s make a code chunk for a variable in Python.</p>
 <pre class="python"><code>python_chunk = 7</code></pre>
-<p>Wow! Compelling stuff. Bet you’re on the edge of your seat right now. Well now’s the moment of truth. The big reveal. If using an R code chunk, you simply put a “py$”&quot; in front of whatever the python varaible is.</p>
+<p>Wow! Compelling stuff. Bet you’re on the edge of your seat right now. Well now’s the moment of truth. The big reveal. If using an R code chunk, you simply put a “py$”&quot; in front of whatever the python variable is.</p>
 <pre class="r"><code>R_chunk + py$python_chunk</code></pre>
 <pre><code>## [1] 20</code></pre>
-<p>There you have it! The 7 R value and the 13 python value added up to 20. As simple as it seems, without reticulate the computer would not be able to do this. But that’s not all! You can even use reticulate in a python chunk by putting “r.” in front of the variable name</p>
+<p>There you have it! The 7 R value and the 13 python value added up to 20. As simple as it seems, without reticulate the computer would not be able to do this. But that’s not all! You can even use R in a python chunk by putting “r.” in front of the variable name.</p>
 <pre class="python"><code>print(r.R_chunk + python_chunk)</code></pre>
 <pre><code>## 20.0</code></pre>
 <p>Although this example used numbers, you can combine words too! Check this out!</p>
