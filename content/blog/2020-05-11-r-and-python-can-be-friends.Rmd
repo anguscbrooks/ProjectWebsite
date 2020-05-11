@@ -29,13 +29,13 @@ Next, let's make a code chunk for a variable in Python.
 python_chunk = 7
 ```
 
-Wow! Compelling stuff. Bet you're on the edge of your seat right now. Well now's the moment of truth. The big reveal. If using an R code chunk, you simply put a "py$"" in front of whatever the python varaible is.
+Wow! Compelling stuff. Bet you're on the edge of your seat right now. Well now's the moment of truth. The big reveal. If using an R code chunk, you simply put a "py$"" in front of whatever the python variable is.
 
 ```{R}
 R_chunk + py$python_chunk
 ```
 
-There you have it! The 7 R value and the 13 python value added up to 20. As simple as it seems, without reticulate the computer would not be able to do this. But that's not all! You can even use reticulate in a python chunk by putting "r." in front of the variable name
+There you have it! The 7 R value and the 13 python value added up to 20. As simple as it seems, without reticulate the computer would not be able to do this. But that's not all! You can even use R in a python chunk by putting "r." in front of the variable name.
 
 ```{python}
 print(r.R_chunk + python_chunk)
